@@ -16,8 +16,51 @@
 #
 # TODO: Everything! lololol
 
+# Imports
+import getpass
+
+# 
+# Get ths users input for either their ID card swipe, or manually enter information
+#
+# Return:
+#   Users input as string
+#
+def get_input():
+    pass
+
+#
+# Query Pitt LDAP server for users 2P number
+#
+# Return:
+#   Result of LDAP query, as string
+#
+def query_ldap(2PNumber):
+    pass
+
+# 
+# Add record to current building access log
+#
+# Return:
+#   True if the add is successful, False otherwise
+#
+def add_log(user, first, last, time):
+    pass
+
+#
+# Delete record from the current building access log
+#
+# Return:
+#   True if the delete is successful, False otherwise
+#
+def del_log(user):
+    pass
+
+#
+# Main program logic
+#
 def main():
     pass
 
+# Run the program
 if __name__ == "__main__":
     main()
