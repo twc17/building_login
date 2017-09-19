@@ -56,6 +56,15 @@ def del_log(user):
     pass
 
 #
+# Write add/del entry to log file
+#
+# Return:
+#   True if write to log file was successful, False otherwise
+#
+def write_log(entry, log_file):
+    pass
+
+#
 # Main program logic
 #
 def main():
