@@ -3,8 +3,8 @@
 # Title: building_login.py
 #
 # Author: Troy <twc17@pitt.edu>
-# Date Modified: 09/20/2017
-# Version: 1.0.1
+# Date Modified: 09/21/2017
+# Version: 1.2.1
 # 
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -19,10 +19,10 @@
 # Usage:
 #   python [-h] building_login.py
 #
-# TODO: Everything! lololol
+# TODO: Test LDAP lookups
 
 # Imports
-import getpass, argparse, ldap
+import getpass, argparse, ldap, sys
 
 def get_input():
     """Get ths users input for either their ID card swipe, or manually enter information
@@ -30,13 +30,18 @@ def get_input():
     Returns:
         Users input as string
     """
-    return getpass.getpass("Swipe Pitt ID Card or press 'g' to sign in a guest...")
+    user_input = getpass.getpass("Swipe Pitt ID Card or press 'g' to sign in a guest...")
 
-def query_ldap(2PNumber, l):
+    if user_input[0] == 'g':
+        return user_input[0]
+    else:
+        card_number = user_input.split('=')
+
+def query_ldap(card_number, l):
     """Query Pitt LDAP server for users 2P number
 
     Arguments:
-        2PNumber -- Pitt 2P number from ID card
+        card_number -- Pitt 2P number from ID card
         l -- LDAP connection
 
     Returns:
@@ -45,7 +50,7 @@ def query_ldap(2PNumber, l):
     basedn = "ou=Accounts,dc=unit,dc=pitt,dc=edu"
 
     # Attribute that we are searching for
-    search_filter = "(PittPantherCardID=" + 2PNumber + ")"
+    search_filter = "(PittPantherCardID=" + card_number + ")"
     # The attributes we want to return from the search
     search_attribute = ["cn", "sn"]
     # This will scope the entire subtree under Accounts
