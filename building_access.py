@@ -14,6 +14,7 @@
 # 
 # Dependencies:
 #   python 2.6.6+
+#   python-ldap
 #
 # Usage:
 #   python [-h] building_login.py
@@ -21,7 +22,7 @@
 # TODO: Everything! lololol
 
 # Imports
-import getpass, argparse
+import getpass, argparse, ldap
 
 def get_input():
     """Get ths users input for either their ID card swipe, or manually enter information
@@ -29,18 +30,43 @@ def get_input():
     Returns:
         Users input as string
     """
-    pass
+    return getpass.getpass("Swipe Pitt ID Card or press 'g' to sign in a guest...")
 
-def query_ldap(2PNumber):
+def query_ldap(2PNumber, l):
     """Query Pitt LDAP server for users 2P number
 
     Arguments:
         2PNumber -- Pitt 2P number from ID card
+        l -- LDAP connection
 
     Returns:
         Result of LDAP query, as string
     """
-    pass
+    basedn = "ou=Accounts,dc=unit,dc=pitt,dc=edu"
+
+    # Attribute that we are searching for
+    search_filter = "(PittPantherCardID=" + 2PNumber + ")"
+    # The attributes we want to return from the search
+    search_attribute = ["cn", "sn"]
+    # This will scope the entire subtree under Accounts
+    search_scope = l.SCOPE_SUBTREE
+
+    # Try to search 
+    try:
+        ldap_result_id = l.search(basedn, search_scope, search_filter, search_attribute)
+        result_set = []
+        while 1:
+            result_type, result_data = l.result(ldap_result_id, 0)
+            if (result_data == []):
+                break
+            else:
+                if result_type == l.RES_SEARCH_ENTRY:
+                    result_set.append(result_data)
+
+        return result_set
+    
+    except ldap.LDAPError, e:
+        print(e)
 
 def add_log(user, first, last, time, db):
     """Add record to current building access log
@@ -84,7 +110,24 @@ def write_log(entry, log_file):
 
 def main():
     """Main"""
-    pass
+    # LDAP bind settings
+    l = ldap.initialize('ldaps://pittad.univ.pitt.edu:636')
+    binddn = "cn=TWC17,ou=Accounts,dc=univ,dv=pitt,dc=edu"
+    pw = "MyPassword"
+
+    # Try to bind to LDAP server
+    try:
+        l.protocol_version = ldap.VERSION3
+        l.simple_bind_s(binddn, pw)
+    except ldap.INVALID_CREDENTIALS:
+        print("Invalid username/password for LDAP bind")
+        sys.exit(0)
+    except ldap.LDAPError, e:
+        if type(e.message) == dict and e.message.key_key('desc'):
+            print(e.message['desc'])
+        else:
+            print(e)
+        sys.exit(0)
 
 # Run the program
 if __name__ == "__main__":
