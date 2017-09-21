@@ -4,7 +4,7 @@
 #
 # Author: Troy <twc17@pitt.edu>
 # Date Modified: 09/21/2017
-# Version: 1.2.1
+# Version: 1.2.2
 # 
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -19,7 +19,7 @@
 # Usage:
 #   python [-h] building_login.py
 #
-# TODO: Test LDAP lookups
+# TODO: Test LDAP lookups. User input is working well. Should be able to handle bad card reads too.
 
 # Imports
 import getpass, argparse, ldap, sys
@@ -36,6 +36,10 @@ def get_input():
         return user_input[0]
     else:
         card_number = user_input.split('=')
+        if len(card_number) == 2:
+            return card_number[0][-10:]
+        else:
+            return "ERROR"
 
 def query_ldap(card_number, l):
     """Query Pitt LDAP server for users 2P number
@@ -47,7 +51,7 @@ def query_ldap(card_number, l):
     Returns:
         Result of LDAP query, as string
     """
-    basedn = "ou=Accounts,dc=unit,dc=pitt,dc=edu"
+    basedn = "ou=account,dc=unit,dc=pitt,dc=edu"
 
     # Attribute that we are searching for
     search_filter = "(PittPantherCardID=" + card_number + ")"
@@ -117,7 +121,7 @@ def main():
     """Main"""
     # LDAP bind settings
     l = ldap.initialize('ldaps://pittad.univ.pitt.edu:636')
-    binddn = "cn=TWC17,ou=Accounts,dc=univ,dv=pitt,dc=edu"
+    binddn = "PITT\\twc17"
     pw = "MyPassword"
 
     # Try to bind to LDAP server
@@ -133,6 +137,9 @@ def main():
         else:
             print(e)
         sys.exit(0)
+
+    user_input = get_input()
+    print(user_input)
 
 # Run the program
 if __name__ == "__main__":
