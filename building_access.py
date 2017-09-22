@@ -3,8 +3,8 @@
 # Title: building_login.py
 #
 # Author: Troy <twc17@pitt.edu>
-# Date Modified: 09/21/2017
-# Version: 1.2.2
+# Date Modified: 09/22/2017
+# Version: 1.3.3
 # 
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -19,7 +19,7 @@
 # Usage:
 #   python [-h] building_login.py
 #
-# TODO: Test LDAP lookups. User input is working well. Should be able to handle bad card reads too.
+# TODO: Find a way to make LDAP searches faster!
 
 # Imports
 import getpass, argparse, ldap, sys
@@ -30,14 +30,14 @@ def get_input():
     Returns:
         Users input as string
     """
-    user_input = getpass.getpass("Swipe Pitt ID Card or press 'g' to sign in a guest...")
+    user_input = getpass.getpass("Swipe Pitt ID Card or press 'Return' to sign in a guest...")
 
-    if user_input[0] == 'g':
-        return user_input[0]
+    if len(user_input) == 0:
+        return "GUEST"
     else:
         card_number = user_input.split('=')
         if len(card_number) == 2:
-            return card_number[0][-10:]
+            return card_number[0][-9:]
         else:
             return "ERROR"
 
@@ -51,14 +51,14 @@ def query_ldap(card_number, l):
     Returns:
         Result of LDAP query, as string
     """
-    basedn = "ou=account,dc=unit,dc=pitt,dc=edu"
+    basedn = "ou=Accounts,dc=univ,dc=pitt,dc=edu"
 
     # Attribute that we are searching for
     search_filter = "(PittPantherCardID=" + card_number + ")"
     # The attributes we want to return from the search
     search_attribute = ["cn", "sn"]
     # This will scope the entire subtree under Accounts
-    search_scope = l.SCOPE_SUBTREE
+    search_scope = ldap.SCOPE_SUBTREE
 
     # Try to search 
     try:
@@ -69,7 +69,7 @@ def query_ldap(card_number, l):
             if (result_data == []):
                 break
             else:
-                if result_type == l.RES_SEARCH_ENTRY:
+                if result_type == ldap.RES_SEARCH_ENTRY:
                     result_set.append(result_data)
 
         return result_set
@@ -121,10 +121,12 @@ def main():
     """Main"""
     # LDAP bind settings
     l = ldap.initialize('ldaps://pittad.univ.pitt.edu:636')
-    binddn = "PITT\\twc17"
+    binddn = "PITT\\RS610085"
     pw = "MyPassword"
 
-    # Try to bind to LDAP server
+    # Try to bind to LDAP server. We only want to do this once,
+    # not every time we need to do a search so we are binding 
+    # inside of main()
     try:
         l.protocol_version = ldap.VERSION3
         l.simple_bind_s(binddn, pw)
@@ -138,8 +140,13 @@ def main():
             print(e)
         sys.exit(0)
 
-    user_input = get_input()
-    print(user_input)
+    while True:
+        user_input = get_input()
+        result = query_ldap("*" + user_input + "*", l)
+        print(result)
+
+    # Unbind from LDAP server
+    l.unbind_s()
 
 # Run the program
 if __name__ == "__main__":
