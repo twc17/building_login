@@ -4,7 +4,7 @@
 #
 # Author: Troy <twc17@pitt.edu>
 # Date Modified: 09/22/2017
-# Version: 1.3.3
+# Version: 1.3.4
 # 
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -75,8 +75,8 @@ def query_ldap(card_number):
     search_filter = "(PittPantherCardID=" + card_number + ")"
     # The attributes we want to return from the search
     search_attribute = ["cn", "sn"]
-    # This will scope the entire subtree under Accounts
-    search_scope = ldap.SCOPE_SUBTREE
+    # This will scope one level below Accounts
+    search_scope = ldap.SCOPE_ONELEVEL
 
     # Try to search 
     try:
@@ -142,8 +142,6 @@ def main():
         user_input = get_input()
         result = query_ldap("*" + user_input + "*")
         print(result)
-
-    # Unbind from LDAP server
 
 # Run the program
 if __name__ == "__main__":
