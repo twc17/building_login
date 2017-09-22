@@ -74,7 +74,7 @@ def query_ldap(card_number):
     # Attribute that we are searching for
     search_filter = "(PittPantherCardID=" + card_number + ")"
     # The attributes we want to return from the search
-    search_attribute = ["cn", "sn"]
+    search_attribute = ["cn", "sn", "givenName"]
     # This will scope one level below Accounts
     search_scope = ldap.SCOPE_ONELEVEL
 
