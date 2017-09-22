@@ -122,7 +122,7 @@ def main():
     # LDAP bind settings
     l = ldap.initialize('ldaps://pittad.univ.pitt.edu:636')
     binddn = "PITT\\RS610085"
-    pw = "MyPassword"
+    pw = "sgcxtrp9"
 
     # Try to bind to LDAP server. We only want to do this once,
     # not every time we need to do a search so we are binding 
