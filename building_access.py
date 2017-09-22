@@ -41,17 +41,35 @@ def get_input():
         else:
             return "ERROR"
 
-def query_ldap(card_number, l):
+def query_ldap(card_number):
     """Query Pitt LDAP server for users 2P number
 
     Arguments:
         card_number -- Pitt 2P number from ID card
-        l -- LDAP connection
 
     Returns:
         Result of LDAP query, as string
     """
+    # LDAP bind settings
+    l = ldap.initialize('ldaps://pittad.univ.pitt.edu:636')
     basedn = "ou=Accounts,dc=univ,dc=pitt,dc=edu"
+    binddn = "PITT\\RS610085"
+    pw = "sgcxtrp9"
+
+    # Try to bind to LDAP server. Figured out that the bind
+    # will eventually timeout, so we need to do it on every query :/
+    try:
+        l.protocol_version = ldap.VERSION3
+        l.simple_bind_s(binddn, pw)
+    except ldap.INVALID_CREDENTIALS:
+        print("Invalid username/password for LDAP bind")
+        sys.exit(0)
+    except ldap.LDAPError, e:
+        if type(e.message) == dict and e.message.key_key('desc'):
+            print(e.message['desc'])
+        else:
+            print(e)
+        sys.exit(0)
 
     # Attribute that we are searching for
     search_filter = "(PittPantherCardID=" + card_number + ")"
@@ -72,6 +90,7 @@ def query_ldap(card_number, l):
                 if result_type == ldap.RES_SEARCH_ENTRY:
                     result_set.append(result_data)
 
+        l.unbind_s()
         return result_set
     
     except ldap.LDAPError, e:
@@ -119,34 +138,12 @@ def write_log(entry, log_file):
 
 def main():
     """Main"""
-    # LDAP bind settings
-    l = ldap.initialize('ldaps://pittad.univ.pitt.edu:636')
-    binddn = "PITT\\RS610085"
-    pw = "sgcxtrp9"
-
-    # Try to bind to LDAP server. We only want to do this once,
-    # not every time we need to do a search so we are binding 
-    # inside of main()
-    try:
-        l.protocol_version = ldap.VERSION3
-        l.simple_bind_s(binddn, pw)
-    except ldap.INVALID_CREDENTIALS:
-        print("Invalid username/password for LDAP bind")
-        sys.exit(0)
-    except ldap.LDAPError, e:
-        if type(e.message) == dict and e.message.key_key('desc'):
-            print(e.message['desc'])
-        else:
-            print(e)
-        sys.exit(0)
-
     while True:
         user_input = get_input()
-        result = query_ldap("*" + user_input + "*", l)
+        result = query_ldap("*" + user_input + "*")
         print(result)
 
     # Unbind from LDAP server
-    l.unbind_s()
 
 # Run the program
 if __name__ == "__main__":
