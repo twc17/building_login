@@ -3,8 +3,8 @@
 # Title: building_login.py
 #
 # Author: Troy <twc17@pitt.edu>
-# Date Modified: 09/22/2017
-# Version: 1.3.4
+# Date Modified: 09/25/2017
+# Version: 1.3.5
 # 
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -141,7 +141,10 @@ def main():
     while True:
         user_input = get_input()
         result = query_ldap("*" + user_input + "*")
-        print(result)
+        # Sooo, information is really deep in some data structs
+        print("Username: " + result[0][0][1]['cn'][0])
+        print("First name: " + result[0][0][1]['givenName'][0])
+        print("Last name: " + result[0][0][1]['sn'][0])
 
 # Run the program
 if __name__ == "__main__":
