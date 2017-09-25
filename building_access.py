@@ -141,10 +141,10 @@ def main():
     while True:
         user_input = get_input()
         if (user_input == 'GUEST'): 
-            print("GUEST")
+            print(user_input)
             continue
         if (user_input == 'ERROR'):
-            print("ERROR")
+            print(user_input)
             continue
         result = query_ldap("*" + user_input + "*")
         # Sooo, information is really deep in some data structs
