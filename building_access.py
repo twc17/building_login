@@ -4,7 +4,7 @@
 #
 # Author: Troy <twc17@pitt.edu>
 # Date Modified: 09/25/2017
-# Version: 1.3.5
+# Version: 1.3.6
 # 
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -140,6 +140,12 @@ def main():
     """Main"""
     while True:
         user_input = get_input()
+        if (user_input == 'GUEST'): 
+            print("GUEST")
+            continue
+        if (user_input == 'ERROR'):
+            print("ERROR")
+            continue
         result = query_ldap("*" + user_input + "*")
         # Sooo, information is really deep in some data structs
         print("Username: " + result[0][0][1]['cn'][0])
