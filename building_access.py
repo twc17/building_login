@@ -4,7 +4,7 @@
 #
 # Author: Troy <twc17@pitt.edu>
 # Date Modified: 09/26/2017
-# Version: 1.3.7
+# Version: 1.4.7
 # 
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -14,20 +14,18 @@
 # 
 # Dependencies:
 #   python 2.6.6+
-#   python-ldap
-#
+#   python-ldap #
 # Usage:
 #   python [-h] building_login.py
 #
 # TODO: Find a way to make LDAP searches faster!
 
 # Imports
-import getpass, argparse, ldap, sys
+import getpass, argparse, ldap, sys, datetime
 
 def get_input():
     """Get ths users input for either their ID card swipe, or manually enter information
-
-    Returns:
+Returns:
         Users input as string
     """
     user_input = getpass.getpass("Swipe Pitt ID Card or press 'Return' to sign in a guest...")
@@ -134,7 +132,10 @@ def write_log(entry, log_file):
     Return:
         True if write to log file was successful, False otherwise
     """
-    pass
+    # Format the time 2013-09-18 11:16:32
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    entry = ",".join(entry)
+    log_file.write(now + " " + entry + "\n")
 
 def main():
     """Main"""
@@ -144,9 +145,11 @@ def main():
         try:
             user_input = get_input()
             if (user_input == 'GUEST'): 
+                write_log(['GUEST'], log_file)
                 print(user_input)
                 continue
             if (user_input == 'ERROR'):
+                write_log(['ERROR'], log_file)
                 print(user_input)
                 continue
             result = query_ldap("*" + user_input + "*")
