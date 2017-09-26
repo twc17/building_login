@@ -26,7 +26,8 @@ import getpass, argparse, ldap, sys, datetime
 
 def get_input():
     """Get ths users input for either their ID card swipe, or manually enter information
-Returns:
+
+    Returns:
         Users input as string
     """
     user_input = getpass.getpass("Swipe Pitt ID Card or press 'Return' to sign in a guest...")
