@@ -68,7 +68,7 @@ def query_ldap(card_number):
     l = ldap.initialize('ldaps://pittad.univ.pitt.edu:636')
     basedn = "ou=Accounts,dc=univ,dc=pitt,dc=edu"
     binddn = "PITT\\RS610085"
-    pw = "sgcxtrp9"
+    pw = "**********"
 
     # Try to bind to LDAP server. Figured out that the bind
     # will eventually timeout, so we need to do it on every query :/
