@@ -138,15 +138,18 @@ def write_log(entry, log_file):
     Return:
         True if write to log file was successful, False otherwise
     """
+    # Open out log_file to work with
+    log_file = open(log_file, 'a')
     # Format the time 2013-09-18 11:16:32
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     entry = ",".join(entry)
     log_file.write(now + " " + entry + "\n")
+    log_file.close()
 
 def main():
     """Main"""
     # File we will use to log all IN/OUT and ERROR activity
-    log_file = open("building_access.log", 'a')
+    log_file = "building_access.log"
     # Dictionary structure that will be used for running building log
     # db[Username] = first_name, last_name, time_in
     db = {}
@@ -196,9 +199,6 @@ def main():
             print
             print("Exiting...")
             break
-
-    # Don't forget to close the log file!
-    log_file.close()
 
 # Run the program
 if __name__ == "__main__":
