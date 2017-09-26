@@ -4,7 +4,7 @@
 #
 # Author: Troy <twc17@pitt.edu>
 # Date Modified: 09/26/2017
-# Version: 1.4.7
+# Version: 1.5.7
 # 
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -14,12 +14,13 @@
 # 
 # Dependencies:
 #   python 2.6.6+
-#   python-ldap #
+#   python-ldap 
+#
 # Usage:
 #   python [-h] building_login.py
 #
 # TODO: Find a way to make LDAP searches faster!
-#       Make guest stuff. Generate usernames, get keyboard input for guest first/last name
+#       Make output look better! Then ready to try and break it!
 
 # Imports
 import getpass, argparse, ldap, sys, datetime
@@ -40,6 +41,19 @@ def get_input():
             return card_number[0][-9:]
         else:
             return "ERROR"
+
+def get_guest():
+    """Gets keyboard input for adding or removing a guest
+
+    Returns:
+        Guests username, first name, last name
+    """
+    first_name = raw_input("Enter the guests first name: ")
+    last_name = raw_input("Enter the guests last name: ")
+
+    username = first_name[0].upper() + last_name.upper()
+
+    return [username, first_name, last_name]
 
 def query_ldap(card_number):
     """Query Pitt LDAP server for users 2P number
@@ -161,17 +175,20 @@ def main():
         try:
             user_input = get_input()
             if (user_input == 'GUEST'): 
+                guest = get_guest()
                 # Check to see if the user 'GUEST' is logged in
                 # If they are, remove them from the current log
-                if 'GUEST' in db:
-                    del_log('GUEST', db)
-                    write_log(['GUEST', 'John', 'Doe', 'OUT'], log_file)
-                    print("GUEST logged OUT!")
+                if guest[0] in db:
+                    del_log(guest[0], db)
+                    guest.append("OUT")
+                    write_log(guest, log_file)
+                    print(guest[0] + " logged OUT!")
                 # Else add the 'GUEST' user to the current log
                 else:
-                    add_log('GUEST', 'John', 'Doe', db)
-                    write_log(['GUEST', 'John', 'Doe', 'IN'], log_file)
-                    print("GUEST logged IN!")
+                    add_log(guest[0], guest[1], guest[2], db)
+                    guest.append("IN")
+                    write_log(guest, log_file)
+                    print(guest[0] + " logged IN!")
                 continue
             # Handle bad inputs
             if (user_input == 'ERROR'):
