@@ -139,7 +139,11 @@ def write_log(entry, log_file):
 
 def main():
     """Main"""
+    # File we will use to log all IN/OUT and ERROR activity
     log_file = open("building_access.log", 'a')
+    # Dictionary structure that will be used for running building log
+    # db[Username] = first_name, last_name, time_in
+    db = {}
 
     while True:
         try:
