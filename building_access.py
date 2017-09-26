@@ -154,9 +154,12 @@ def main():
                 continue
             result = query_ldap("*" + user_input + "*")
             # Sooo, information is really deep in some data structs
-            print("Username: " + result[0][0][1]['cn'][0])
-            print("First name: " + result[0][0][1]['givenName'][0])
-            print("Last name: " + result[0][0][1]['sn'][0])
+            # pitt_user = [username, first_name, last_name]
+            pitt_user = [result[0][0][1]['cn'][0], result[0][0][1]['givenName'][0], result[0][0][1]['sn'][0]]
+            write_log(pitt_user, log_file)
+            print("Username: " + pitt_user[0])
+            print("First name: " + pitt_user[1])
+            print("Last name: " + pitt_user[2])
         except KeyboardInterrupt:
             print
             print("Exiting...")
