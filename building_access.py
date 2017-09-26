@@ -19,6 +19,7 @@
 #   python [-h] building_login.py
 #
 # TODO: Find a way to make LDAP searches faster!
+#       Make guest stuff. Generate usernames, get keyboard input for guest first/last name
 
 # Imports
 import getpass, argparse, ldap, sys, datetime
@@ -94,20 +95,22 @@ def query_ldap(card_number):
     except ldap.LDAPError, e:
         print(e)
 
-def add_log(user, first, last, time, db):
+def add_log(user, first, last, db):
     """Add record to current building access log
 
     Arguments:
         user -- Pitt Username
         first -- First name
         last -- Last name
-        time -- Date/time that the user is logging in
         db -- Database of current building log
 
     Returns:
         True if the add is successful, False otherwise
     """
-    pass
+    # Format the time 2013-09-18 11:16:32
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    db[user] = [first, last, now]
+    return True
 
 def del_log(user, db):
     """Delete record from the current building access log
@@ -119,7 +122,10 @@ def del_log(user, db):
     Return:
         True if the delete is successful, False otherwise
     """
-    pass
+    if db.pop(user, False) is not False:
+        return True
+    else:
+        return False
 
 def write_log(entry, log_file):
     """Write add/del entry to log file
@@ -146,12 +152,24 @@ def main():
     db = {}
 
     while True:
+        # Testing to print the current building log
+        print(db)
         try:
             user_input = get_input()
             if (user_input == 'GUEST'): 
-                write_log(['GUEST'], log_file)
-                print(user_input)
+                # Check to see if the user 'GUEST' is logged in
+                # If they are, remove them from the current log
+                if 'GUEST' in db:
+                    del_log('GUEST', db)
+                    write_log(['GUEST', 'John', 'Doe', 'OUT'], log_file)
+                    print("GUEST logged OUT!")
+                # Else add the 'GUEST' user to the current log
+                else:
+                    add_log('GUEST', 'John', 'Doe', db)
+                    write_log(['GUEST', 'John', 'Doe', 'IN'], log_file)
+                    print("GUEST logged IN!")
                 continue
+            # Handle bad inputs
             if (user_input == 'ERROR'):
                 write_log(['ERROR'], log_file)
                 print(user_input)
@@ -160,15 +178,26 @@ def main():
             # Sooo, information is really deep in some data structs
             # pitt_user = [username, first_name, last_name]
             pitt_user = [result[0][0][1]['cn'][0], result[0][0][1]['givenName'][0], result[0][0][1]['sn'][0]]
-            write_log(pitt_user, log_file)
-            print("Username: " + pitt_user[0])
-            print("First name: " + pitt_user[1])
-            print("Last name: " + pitt_user[2])
+            # Check to tsee if the user scanned from ID card is logged in
+            # If they are, remove them from the current building log
+            if pitt_user[0] in db:
+                del_log(pitt_user[0], db)
+                pitt_user.append("OUT")
+                write_log(pitt_user, log_file)
+                print(pitt_user[0] + " logged OUT!")
+            # Else add the user to the current building log
+            else:
+                add_log(pitt_user[0], pitt_user[1], pitt_user[2], db)
+                pitt_user.append("IN")
+                write_log(pitt_user, log_file)
+                print(pitt_user[0] + " logged IN!")
+        # Catch keyboard interrupt and exit gracefully
         except KeyboardInterrupt:
             print
             print("Exiting...")
             break
 
+    # Don't forget to close the log file!
     log_file.close()
 
 # Run the program
