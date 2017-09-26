@@ -3,8 +3,8 @@
 # Title: building_login.py
 #
 # Author: Troy <twc17@pitt.edu>
-# Date Modified: 09/25/2017
-# Version: 1.3.6
+# Date Modified: 09/26/2017
+# Version: 1.3.7
 # 
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -138,19 +138,28 @@ def write_log(entry, log_file):
 
 def main():
     """Main"""
+    log_file = open("building_access.log", 'a')
+
     while True:
-        user_input = get_input()
-        if (user_input == 'GUEST'): 
-            print(user_input)
-            continue
-        if (user_input == 'ERROR'):
-            print(user_input)
-            continue
-        result = query_ldap("*" + user_input + "*")
-        # Sooo, information is really deep in some data structs
-        print("Username: " + result[0][0][1]['cn'][0])
-        print("First name: " + result[0][0][1]['givenName'][0])
-        print("Last name: " + result[0][0][1]['sn'][0])
+        try:
+            user_input = get_input()
+            if (user_input == 'GUEST'): 
+                print(user_input)
+                continue
+            if (user_input == 'ERROR'):
+                print(user_input)
+                continue
+            result = query_ldap("*" + user_input + "*")
+            # Sooo, information is really deep in some data structs
+            print("Username: " + result[0][0][1]['cn'][0])
+            print("First name: " + result[0][0][1]['givenName'][0])
+            print("Last name: " + result[0][0][1]['sn'][0])
+        except KeyboardInterrupt:
+            print
+            print("Exiting...")
+            break
+
+    log_file.close()
 
 # Run the program
 if __name__ == "__main__":
