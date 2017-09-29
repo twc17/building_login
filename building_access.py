@@ -3,8 +3,8 @@
 # Title: building_login.py
 #
 # Author: Troy <twc17@pitt.edu>
-# Date Modified: 09/26/2017
-# Version: 1.5.7
+# Date Modified: 09/29/2017
+# Version: 1.6.7
 # 
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -37,7 +37,7 @@ def get_input():
         return "GUEST"
     else:
         card_number = user_input.split('=')
-        if len(card_number) == 2:
+        if len(card_number) == 2 and card_number[0].isdigit():
             return card_number[0][-9:]
         else:
             return "ERROR"
@@ -68,7 +68,7 @@ def query_ldap(card_number):
     l = ldap.initialize('ldaps://pittad.univ.pitt.edu:636')
     basedn = "ou=Accounts,dc=univ,dc=pitt,dc=edu"
     binddn = "PITT\\RS610085"
-    pw = "**********"
+    pw = "sgcxtrp9"
 
     # Try to bind to LDAP server. Figured out that the bind
     # will eventually timeout, so we need to do it on every query :/
@@ -125,6 +125,7 @@ def add_log(user, first, last, db):
     # Format the time 2013-09-18 11:16:32
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     db[user] = [first, last, now]
+    print(user + " logged IN!")
     return True
 
 def del_log(user, db):
@@ -138,6 +139,7 @@ def del_log(user, db):
         True if the delete is successful, False otherwise
     """
     if db.pop(user, False) is not False:
+        print(user + " logged OUT!")
         return True
     else:
         return False
@@ -161,6 +163,24 @@ def write_log(entry, log_file):
     log_file.write(now + " " + entry + "\n")
     log_file.close()
 
+def print_log(db):
+    """Print out current building log nice and clean
+
+    Arguments:
+        db -- Currently building log
+
+    Returns:
+        None
+    """
+    building_log = []
+    
+    for key, value in db.iteritems():
+        user_line = key + "," + ",".join(value)
+        building_log.append(user_line)
+
+    for entry in building_log:
+        print(entry)
+
 def main():
     """Main"""
     # File we will use to log all IN/OUT and ERROR activity
@@ -171,9 +191,12 @@ def main():
 
     while True:
         # Testing to print the current building log
-        print(db)
+        print_log(db)
         try:
+            # Swipe ID card or press Return for guest...
             user_input = get_input()
+
+            # User hit enter and wants to deal with a guest
             if (user_input == 'GUEST'): 
                 guest = get_guest()
                 # Check to see if the user 'GUEST' is logged in
@@ -182,36 +205,39 @@ def main():
                     del_log(guest[0], db)
                     guest.append("OUT")
                     write_log(guest, log_file)
-                    print(guest[0] + " logged OUT!")
                 # Else add the 'GUEST' user to the current log
                 else:
                     add_log(guest[0], guest[1], guest[2], db)
                     guest.append("IN")
                     write_log(guest, log_file)
-                    print(guest[0] + " logged IN!")
                 continue
+
             # Handle bad inputs
             if (user_input == 'ERROR'):
+                # Write error to log file and let the user know something went wrong
                 write_log(['ERROR'], log_file)
                 print(user_input)
                 continue
+
+            # User didn't want to enter a guest, and we handled bad inputs,
+            # so we now know that we're dealing with a Pitt ID card swipe
             result = query_ldap("*" + user_input + "*")
+
             # Sooo, information is really deep in some data structs
             # pitt_user = [username, first_name, last_name]
             pitt_user = [result[0][0][1]['cn'][0], result[0][0][1]['givenName'][0], result[0][0][1]['sn'][0]]
-            # Check to tsee if the user scanned from ID card is logged in
+
+            # Check to to see if the user scanned from ID card is logged in
             # If they are, remove them from the current building log
             if pitt_user[0] in db:
                 del_log(pitt_user[0], db)
                 pitt_user.append("OUT")
                 write_log(pitt_user, log_file)
-                print(pitt_user[0] + " logged OUT!")
             # Else add the user to the current building log
             else:
                 add_log(pitt_user[0], pitt_user[1], pitt_user[2], db)
                 pitt_user.append("IN")
                 write_log(pitt_user, log_file)
-                print(pitt_user[0] + " logged IN!")
         # Catch keyboard interrupt and exit gracefully
         except KeyboardInterrupt:
             print
