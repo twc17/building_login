@@ -3,18 +3,18 @@
 # Title: building_login.py
 #
 # Author: Troy <twc17@pitt.edu>
-# Date Modified: 09/29/2017
-# Version: 1.6.7
-# 
+# Date Modified: 10/01/2017
+# Version: 1.6.8
+#
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
 #   a Pitt employees 2P number from their ID card. This will then be used for an LDAP query to
-#   get the rest of their account information. You also have the option to manually enter in 
+#   get the rest of their account information. You also have the option to manually enter in
 #   information for guests, or if you forgot your ID card.
-# 
+#
 # Dependencies:
 #   python 2.6.6+
-#   python-ldap 
+#   python-ldap
 #
 # Usage:
 #   python [-h] building_login.py
@@ -92,7 +92,7 @@ def query_ldap(card_number):
     # This will scope one level below Accounts
     search_scope = ldap.SCOPE_ONELEVEL
 
-    # Try to search 
+    # Try to search
     try:
         ldap_result_id = l.search(basedn, search_scope, search_filter, search_attribute)
         result_set = []
@@ -106,7 +106,7 @@ def query_ldap(card_number):
 
         l.unbind_s()
         return result_set
-    
+
     except ldap.LDAPError, e:
         print(e)
 
@@ -126,7 +126,7 @@ def add_log(user, first, last, db):
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     db[user] = [first, last, now]
     os.system('clear')
-    print(user + " logged IN!")
+    print('\x1b[6;30;42m' + user + " logged IN!" + '\x1b[0m')
     time.sleep(2)
     return True
 
@@ -142,7 +142,7 @@ def del_log(user, db):
     """
     if db.pop(user, False) is not False:
         os.system('clear')
-        print(user + " logged OUT!")
+        print('\x1b[6;30;42m' + user + " logged OUT!" + '\x1b[0m')
         time.sleep(2)
         return True
     else:
@@ -154,7 +154,7 @@ def write_log(entry, log_file):
     Arguments:
         entry -- Entry to add to log file
                 Will probably look something like 'USER,last,first,IN/OUT,date'
-        log_file -- Log file to write entry to 
+        log_file -- Log file to write entry to
 
     Return:
         True if write to log file was successful, False otherwise
@@ -177,7 +177,7 @@ def print_log(db):
         None
     """
     building_log = []
-    
+
     for key, value in db.iteritems():
         user_line = key + "," + ",".join(value)
         building_log.append(user_line)
@@ -204,7 +204,7 @@ def main():
             user_input = get_input()
 
             # User hit enter and wants to deal with a guest
-            if (user_input == 'GUEST'): 
+            if (user_input == 'GUEST'):
                 guest = get_guest()
                 # Check to see if the user 'GUEST' is logged in
                 # If they are, remove them from the current log
