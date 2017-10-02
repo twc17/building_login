@@ -224,7 +224,9 @@ def main():
             if (user_input == 'ERROR'):
                 # Write error to log file and let the user know something went wrong
                 write_log(['ERROR'], log_file)
-                print(user_input)
+                os.system('clear')
+                print('\x1b[5;30;41m' + user_input + '\x1b[0m')
+                time.sleep(2)
                 continue
 
             # User didn't want to enter a guest, and we handled bad inputs,
