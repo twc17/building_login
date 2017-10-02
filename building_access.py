@@ -23,7 +23,7 @@
 #       Make output look better! Then ready to try and break it!
 
 # Imports
-import getpass, argparse, ldap, sys, datetime
+import getpass, os, ldap, sys, datetime, time
 
 def get_input():
     """Get ths users input for either their ID card swipe, or manually enter information
@@ -125,7 +125,9 @@ def add_log(user, first, last, db):
     # Format the time 2013-09-18 11:16:32
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     db[user] = [first, last, now]
+    os.system('clear')
     print(user + " logged IN!")
+    time.sleep(2)
     return True
 
 def del_log(user, db):
@@ -139,7 +141,9 @@ def del_log(user, db):
         True if the delete is successful, False otherwise
     """
     if db.pop(user, False) is not False:
+        os.system('clear')
         print(user + " logged OUT!")
+        time.sleep(2)
         return True
     else:
         return False
@@ -177,6 +181,9 @@ def print_log(db):
     for key, value in db.iteritems():
         user_line = key + "," + ",".join(value)
         building_log.append(user_line)
+
+    # Clear the window
+    os.system('clear')
 
     for entry in building_log:
         print(entry)
