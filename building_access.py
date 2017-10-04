@@ -187,7 +187,7 @@ def print_log(db):
 
     for entry in building_log:
         entry = entry.split(',')
-        print('\x1b[5;33;44m' + entry[0] + '\t' + entry[1] + '\t' + entry[2] + '\t' + entry[3] + '\x1b[0m')
+        print(entry[0] + '\t' + entry[1] + '\t' + entry[2] + '\t' + entry[3])
 
 def main():
     """Main"""
