@@ -188,6 +188,24 @@ def print_log(db):
     # Sort list based on date/time stamp
     building_log.sort(key = lambda x: str(x.split(',')[3][-20:])) 
 
+    max_username_len = 0
+    max_first_name_len = 0
+    max_last_name_len = 0
+
     for entry in building_log:
         entry = entry.split(',')
+        if len(entry[0]) > max_username_len:
+            max_username_len = len(entry[0])
+
+        if len(entry[1]) > max_first_name_len:
+            max_first_name_len = len(entry[1])
+
+        if len(entry[2]) > max_last_name_len:
+            max_last_name_len = len(entry[2])
+
         print(entry[0] + '\t' + entry[1] + '\t' + entry[2] + '\t' + entry[3])
+
+    print("max_username_len " + str(max_username_len))
+    print("max_first_name_len " + str(max_first_name_len))
+    print("max_last_name_len " + str(max_last_name_len))
+
