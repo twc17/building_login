@@ -185,7 +185,8 @@ def print_log(db):
     # Clear the window
     os.system('clear')
 
-    building_log.sort(key = lambda x: int(x.split()[2][-20:])) 
+    # Sort list based on date/time stamp
+    building_log.sort(key = lambda x: str(x.split(',')[3][-20:])) 
 
     for entry in building_log:
         entry = entry.split(',')
