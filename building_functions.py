@@ -203,9 +203,5 @@ def print_log(db):
         if len(entry[2]) > max_last_name_len:
             max_last_name_len = len(entry[2])
 
-        print(entry[0] + '\t' + entry[1] + '\t' + entry[2] + '\t' + entry[3])
-
-    print("max_username_len " + str(max_username_len))
-    print("max_first_name_len " + str(max_first_name_len))
-    print("max_last_name_len " + str(max_last_name_len))
-
+        # print(entry[0] + '\t' + entry[1] + '\t' + entry[2] + '\t' + entry[3])
+        print("%s %s %s %s" % (entry[0].center(max_username_len), entry[1].center(max_first_name_len), entry[2].center(max_last_name_len), entry[3].center(len(entry[3]))))
