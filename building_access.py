@@ -3,8 +3,8 @@
 # Title: building_login.py
 #
 # Author: Troy <twc17@pitt.edu>
-# Date Modified: 10/01/2017
-# Version: 1.6.8
+# Date Modified: 10/04/2017
+# Version: 1.7.8
 #
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -184,6 +184,8 @@ def print_log(db):
 
     # Clear the window
     os.system('clear')
+
+    building_log.sort(key = lambda x: int(x.split()[2][-20:])) 
 
     for entry in building_log:
         entry = entry.split(',')
