@@ -36,7 +36,7 @@ def get_input():
         return "GUEST"
     else:
         card_number = user_input.split('=')
-        if len(card_number) == 2 and card_number[0].isdigit():
+        if len(card_number) == 2 and card_number[0][1:].isdigit():
             return card_number[0][-9:]
         else:
             return "ERROR"
@@ -65,6 +65,7 @@ def query_ws(card_number):
     """
     payload = {'search': card_number, 'signon': ''}
     result = requests.get('https://ws-prod.cssd.pitt.edu:8443/AccountsWS/AccountsService.asmx/IndividualSearch', params=payload)
+    return result.content
 
 def add_log(user, first, last, db):
     """Add record to current building access log

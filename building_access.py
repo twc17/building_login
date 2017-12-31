@@ -8,13 +8,12 @@
 #
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
-#   a Pitt employees 2P number from their ID card. This will then be used for an LDAP query to
+#   a Pitt employees 2P number from their ID card. This will then be used for a web service (maybe?) query to
 #   get the rest of their account information. You also have the option to manually enter in
 #   information for guests, or if you forgot your ID card.
 #
 # Dependencies:
 #   python 2.6.6+
-#   python-ldap
 #
 # Usage:
 #   python [-h] building_login.py
@@ -24,6 +23,7 @@
 
 # Imports
 from building_functions import *
+from xml.etree import ElementTree as etree
 
 def main():
     """Main"""
@@ -71,7 +71,8 @@ def main():
 
             # Sooo, information is really deep in some data structs
             # pitt_user = [username, first_name, last_name]
-            pitt_user = [result[0][0][1]['cn'][0], result[0][0][1]['givenName'][0], result[0][0][1]['sn'][0]]
+            tree = etree.fromstring(result)
+            pitt_user = [tree[0][6].text, tree[0][2].text, tree[0][4].text]
 
             # Check to to see if the user scanned from ID card is logged in
             # If they are, remove them from the current building log
