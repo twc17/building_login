@@ -3,8 +3,8 @@
 # Title: building_login.py
 #
 # Author: Troy <twc17@pitt.edu>
-# Date Modified: 10/05/2017
-# Version: 2.7.8
+# Date Modified: 12/31/2017
+# Version: 3.7.8
 #
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
@@ -19,7 +19,7 @@
 # Usage:
 #   python [-h] building_login.py
 #
-# TODO: Find a way to make LDAP searches faster!
+# TODO: test web service query
 #       Make output look better! Then ready to try and break it!
 
 # Imports
@@ -67,7 +67,7 @@ def main():
 
             # User didn't want to enter a guest, and we handled bad inputs,
             # so we now know that we're dealing with a Pitt ID card swipe
-            result = query_ldap("*" + user_input + "*")
+            result = query_ws("2P000" + user_input + "*")
 
             # Sooo, information is really deep in some data structs
             # pitt_user = [username, first_name, last_name]

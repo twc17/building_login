@@ -3,27 +3,26 @@
 # Title: building_functions.py
 #
 # Author: Troy <twc17@pitt.edu>
-# Date Modified: 10/05/2017
-# Version: 2.7.8
+# Date Modified: 12/31/2017
+# Version: 3.7.8
 #
 # Purpose:
 #   This is a program for a building access log book. It uses a magnetic card reader to grab
-#   a Pitt employees 2P number from their ID card. This will then be used for an LDAP query to
+#   a Pitt employees 2P number from their ID card. This will then be used for a HTTPS GET request to
 #   get the rest of their account information. You also have the option to manually enter in
 #   information for guests, or if you forgot your ID card.
 #
 # Dependencies:
 #   python 2.6.6+
-#   python-ldap
 #
 # Usage:
 #   python [-h] building_login.py
 #
-# TODO: Find a way to make LDAP searches faster!
+# TODO: Test web service query
 #       Make output look better! Then ready to try and break it!
 
 # Imports
-import getpass, os, ldap, sys, datetime, time
+import getpass, os, requests, sys, datetime, time
 
 def get_input():
     """Get ths users input for either their ID card swipe, or manually enter information
@@ -55,60 +54,17 @@ def get_guest():
 
     return [username, first_name, last_name]
 
-def query_ldap(card_number):
-    """Query Pitt LDAP server for users 2P number
+def query_ws(card_number):
+    """Query Pitt web services (maybe?) server for users 2P number
 
     Arguments:
         card_number -- Pitt 2P number from ID card
 
     Returns:
-        Result of LDAP query, as string
+        Result of query, as string
     """
-    # LDAP bind settings
-    l = ldap.initialize('ldaps://pittad.univ.pitt.edu:636')
-    basedn = "ou=Accounts,dc=univ,dc=pitt,dc=edu"
-    binddn = "PITT\\RS610085"
-    pw = "sgcxtrp9"
-
-    # Try to bind to LDAP server. Figured out that the bind
-    # will eventually timeout, so we need to do it on every query :/
-    try:
-        l.protocol_version = ldap.VERSION3
-        l.simple_bind_s(binddn, pw)
-    except ldap.INVALID_CREDENTIALS:
-        print("Invalid username/password for LDAP bind")
-        sys.exit(0)
-    except ldap.LDAPError, e:
-        if type(e.message) == dict and e.message.key_key('desc'):
-            print(e.message['desc'])
-        else:
-            print(e)
-        sys.exit(0)
-
-    # Attribute that we are searching for
-    search_filter = "(PittPantherCardID=" + card_number + ")"
-    # The attributes we want to return from the search
-    search_attribute = ["cn", "sn", "givenName"]
-    # This will scope one level below Accounts
-    search_scope = ldap.SCOPE_ONELEVEL
-
-    # Try to search
-    try:
-        ldap_result_id = l.search(basedn, search_scope, search_filter, search_attribute)
-        result_set = []
-        while 1:
-            result_type, result_data = l.result(ldap_result_id, 0)
-            if (result_data == []):
-                break
-            else:
-                if result_type == ldap.RES_SEARCH_ENTRY:
-                    result_set.append(result_data)
-
-        l.unbind_s()
-        return result_set
-
-    except ldap.LDAPError, e:
-        print(e)
+    payload = {'search': card_number, 'signon': ''}
+    result = requests.get('https://ws-prod.cssd.pitt.edu:8443/AccountsWS/AccountsService.asmx/IndividualSearch', params=payload)
 
 def add_log(user, first, last, db):
     """Add record to current building access log
