@@ -37,7 +37,7 @@ def get_input():
     else:
         card_number = user_input.split('=')
         if len(card_number) == 2 and card_number[0][1:].isdigit():
-            return card_number[0][-9:]
+            return card_number[0][-10:]
         else:
             return "ERROR"
 

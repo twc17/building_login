@@ -67,7 +67,7 @@ def main():
 
             # User didn't want to enter a guest, and we handled bad inputs,
             # so we now know that we're dealing with a Pitt ID card swipe
-            result = query_ws("2P000" + user_input + "*")
+            result = query_ws("2P00" + user_input + "*")
 
             # Sooo, information is really deep in some data structs
             # pitt_user = [username, first_name, last_name]
